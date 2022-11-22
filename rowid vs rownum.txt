@@ -34,7 +34,8 @@ AAAR4AAAFAAGzg7AAE
 
 -- ROWNUM 
 ROWNUM is temporary key for the row
-For each row returned by a query, the ROWNUM column returns a number indicating the order in which Oracle selects the row from a table or set of joined rows. The first row selected has a ROWNUM of 1, the second has 2, and so on.
+For each row returned by a query, the ROWNUM column returns a number indicating the order in which Oracle selects the row from a table or set of joined rows. 
+The first row selected has a ROWNUM of 1, the second has 2, and so on.
 If you change your query, the ROWNUM number will refer to another row
 ROWNUM is a consecutive number which applicable for a specific SQL statement only (Numbers that follow each other continuously)
 ROWNUM (numeric) = Generated Sequence Number of your output.
@@ -112,14 +113,16 @@ nd this check goes for all the records of the output. The ROWNUM never gets incr
 
 -----------------------------------------------------------------------
 
---If an ORDER BY clause follows ROWNUM in the same query, then the rows will be reordered by the ORDER BY clause. The results can vary depending on the way the rows are accessed.
+--If an ORDER BY clause follows ROWNUM in the same query, then the rows will be reordered by the ORDER BY clause. 
+--The results can vary depending on the way the rows are accessed.
 
 select *
 from employees
 where rownum < 5
 order by FIRST_NAME;
 
---If you embed the ORDER BY clause in a subquery and place the ROWNUM condition in the top-level query, then you can force the ROWNUM condition to be applied after the ordering of the rows.
+--If you embed the ORDER BY clause in a subquery and place the ROWNUM condition in the top-level query, 
+--then you can force the ROWNUM condition to be applied after the ordering of the rows.
 
 SELECT * FROM
    (SELECT * FROM employees ORDER BY employee_id)
