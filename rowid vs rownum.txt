@@ -1,0 +1,146 @@
+
+/* ROWNUM vs ROWID  */
+
+-- ROWNUM and ROWID are pseudo columns.
+-- It is only for display purpose.
+
+-----------------------------------------------------------------------
+
+-- ROWID  
+ROWID is a permanent unique number for the row
+For each row in the database, the ROWID column returns the address of the row
+If you change your query, the ROWID number will never change
+ROWID is unique ID for a row
+ROWID (hexadecimal) = Generated automatically at the time of insertion of row.
+ROWID consists of 18 character string with the format. BBBBBBBBB.RRRR.FFFF Where B is Block, R is Row, F is FIle
+ROWID is permanently stored in the database
+ROWID is automatically assigned with every inserted into a table
+ROWID can also be used to delete the duplicate records from a table
+The fastest way of accessing data is by using ROWID
+
+-- for example
+
+SELECT rowid FROM employees;
+
+ROWID                            
+------------------
+AAAR4AAAFAAGzg7AAA                      
+AAAR4AAAFAAGzg7AAB                      
+AAAR4AAAFAAGzg7AAC                      
+AAAR4AAAFAAGzg7AAD                      
+AAAR4AAAFAAGzg7AAE
+ 
+-----------------------------------------------------------------------
+
+-- ROWNUM 
+ROWNUM is temporary key for the row
+For each row returned by a query, the ROWNUM column returns a number indicating the order in which Oracle selects the row from a table or set of joined rows. The first row selected has a ROWNUM of 1, the second has 2, and so on.
+If you change your query, the ROWNUM number will refer to another row
+ROWNUM is a consecutive number which applicable for a specific SQL statement only (Numbers that follow each other continuously)
+ROWNUM (numeric) = Generated Sequence Number of your output.
+ROWNUM is not stored permanently in the database 
+ROWNUM is a dynamic value automatically retrieved along with select statement output
+Accessing data is unrelated to ROWNUM
+
+-- for example
+
+SELECT rownum FROM employees;
+
+ROWNUM                 
+------ 
+1                      
+2                      
+3                      
+4                      
+5 
+
+-----------------------------------------------------------------------
+
+/* Example of ROWID and ROWNUM */
+
+SELECT rowid,rownum FROM employees;
+
+ROWID               ROWNUM                 
+---------------------------- 
+AAAR4AAAFAAGzg7AAA, 1                      
+AAAR4AAAFAAGzg7AAB, 2                      
+AAAR4AAAFAAGzg7AAC, 3                      
+AAAR4AAAFAAGzg7AAD, 4                      
+AAAR4AAAFAAGzg7AAE, 5 
+
+
+-----------------------------------------------------------------------
+
+You can limit the amount of results with rownum like this:
+
+SELECT * FROM employees WHERE ROWNUM < 10;   -- (it returns 9 rows)
+
+-----------------------------------------------------------------------
+
+select * from employees
+where rownum<=5;            --(it will execute correctly and gives output first 5 rows in your table )
+
+select * from employees
+where rowid<=5;             --(wrong because rowid helpful to identify the unique value)  
+                            --ORA-00932: inconsistent datatypes: expected ROWID got NUMBER
+                            
+                            
+why we cannot use condition rownum=5 or rownum>5 in oracle?
+
+rownum can be use as -
+
+1)  select * from employees where rownum<5;
+2)  select * from employees where rownum<=5;
+3)  select * from employees where rownum=1;
+
+Are those query will work?
+
+4)  select * from employees where rownum=5;
+5)  select * from employees where rownum>5;
+6)  select * from employees where rownum>=5;
+7)  select * from employees where rownum between 5 and 10;
+
+It returns 0 rows, Why this is so? Is there any specific reason for this?
+
+The value of ROWNUM gets incremented by 1 only after fetching the row data. 
+lets take a scenario ROWNUM=2. 
+When oracle fetches the first row it assigns the ROWNUM as 1 and then checks if the condition ROWNUM=2 is satisfied or not, 
+as the condition is not satisfied the oracle engine skips the first row and now 2nd row would become the 1st row of our output 
+and it gets assigned with ROWNUM as 1 (ROWNUM is not incremented as our first row is skipped) and again our condition ROWNUM=2 is false a
+nd this check goes for all the records of the output. The ROWNUM never gets incremented and no records will be fetched.
+
+
+-----------------------------------------------------------------------
+
+--If an ORDER BY clause follows ROWNUM in the same query, then the rows will be reordered by the ORDER BY clause. The results can vary depending on the way the rows are accessed.
+
+select *
+from employees
+where rownum < 5
+order by FIRST_NAME;
+
+--If you embed the ORDER BY clause in a subquery and place the ROWNUM condition in the top-level query, then you can force the ROWNUM condition to be applied after the ordering of the rows.
+
+SELECT * FROM
+   (SELECT * FROM employees ORDER BY employee_id)
+   WHERE ROWNUM < 5;
+   
+-- what is the output of below query?   
+   
+select * 
+from (select *
+from employees
+order by employee_id)
+where ROWNUM <= 4 and ROWNUM > 1;
+
+
+select *
+from (select employee_id, ROWNUM rnum 
+        from (select *
+            from employees
+            order by employee_id)
+      where ROWNUM <= 4)
+where rnum > 1;
+
+
+-----------------------------------------------------------------------
